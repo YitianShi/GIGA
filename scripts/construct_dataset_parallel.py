@@ -16,6 +16,13 @@ RESOLUTION = 40
 def process_one_scene(args, f):
     if f.suffix != ".npz":
         return f.stem
+    
+    # Skip if already generated
+    voxel_path = args.dataset / "scenes" / (f.stem + ".npz")
+    pc_path = args.dataset / "point_clouds" / (f.stem + ".npz")
+    if voxel_path.exists() and pc_path.exists():
+        return f.stem + " (skipped)"
+    
     depth_imgs, extrinsics = read_sensor_data(args.raw, f.stem)
     # add noise
     depth_imgs = np.array([apply_noise(x, args.add_noise) for x in depth_imgs])
@@ -50,8 +57,8 @@ def main(args):
     if args.single_view:
         print('Loading first view only!')
     # create directory of new dataset
-    (args.dataset / "scenes").mkdir(parents=True)
-    (args.dataset / "point_clouds").mkdir(parents=True)
+    (args.dataset / "scenes").mkdir(parents=True, exist_ok=True)
+    (args.dataset / "point_clouds").mkdir(parents=True, exist_ok=True)
 
     global g_num_completed_jobs
     global g_num_total_jobs

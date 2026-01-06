@@ -90,6 +90,9 @@ class TSDFVolume(object):
             depth_trunc=2.0,
             convert_rgb_to_intensity=False,
         )
+        # import matplotlib.pyplot as plt
+        # plt.imshow(rgbd.depth)
+        # plt.show()
 
         intrinsic = o3d.camera.PinholeCameraIntrinsic(
             width=intrinsic.width,
@@ -131,7 +134,7 @@ class TSDFVolume(object):
 def create_tsdf(size, resolution, depth_imgs, intrinsic, extrinsics):
     tsdf = TSDFVolume(size, resolution)
     for i in range(depth_imgs.shape[0]):
-        extrinsic = Transform.from_matrix(extrinsics[i])
+        extrinsic = Transform.from_list(extrinsics[i])
         tsdf.integrate(depth_imgs[i], intrinsic, extrinsic)
     return tsdf
 

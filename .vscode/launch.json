@@ -5,42 +5,98 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
-            "type": "python",
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
-            "console": "integratedTerminal",
-            "justMyCode": true
+            "console": "integratedTerminal"
         },
         {
-            "name": "Sim Pile",
-            "type": "python",
+            "name": "Python: Generate Data Parallel",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/generate_data_parallel.py",
+            "args": [
+                "--scene", "packed",
+                "--object-set", "packed",
+                "--num-grasps", "4000000",
+                "--num-proc", "1",
+                "--save-scene", "./data/packed/data_packed_train_random_raw_4M"
+            ],
+            "console": "integratedTerminal"
+        },
+        // python scripts/clean_balance_data.py /path/to/raw/data
+        {
+            "name": "Python: Clean and Balance Data",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/clean_balance_data.py",
+            "args": [
+                "./data/packed/data_packed_train_random_raw_4M"
+            ],
+            "console": "integratedTerminal"
+        },
+        // python scripts/construct_dataset_parallel.py --num-proc 40 --single-view --add-noise dex /path/to/raw/data /path/to/new/data
+        {
+            "name": "Python: Construct Dataset Parallel and Add Noise",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/construct_dataset_parallel.py",
+            "args": [
+                "--num-proc", "80",
+                "--single-view",
+                "--add-noise", "dex",
+                "./data/packed/data_packed_train_raw",
+                "./data/packed/data_packed_train_processed_dex_noise"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Save Occ Data Parallel",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/save_occ_data_parallel.py",
+            "args": [
+                "./data/packed/data_packed_train_raw",
+                "100000",
+                "2",
+                "--num-proc",
+                "80"
+            ],
+            "console": "integratedTerminal"
+        },
+        // python scripts/train_giga.py --dataset_raw data/packed/data_packed_train_raw --dataset data/packed/data_packed_train_processed_dex_noise
+        {
+            "name": "Python: Train GIGA",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/train_giga.py",
+            "args": [
+                "--dataset_raw", "data/packed/data_packed_train_raw",
+                "--dataset", "data/packed/data_packed_train_processed_dex_noise",
+                "--batch-size", "256",
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Simulate Grasp Multiple",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/scripts/sim_grasp_multiple.py",
             "args": [
-                "--num-view",
-                "1",
-                "--object-set", 
-                "pile/test",
-                "--scene",
-                "pile",
-                "--num-rounds",
-                "100",
+                "--num-view", "1",
+                "--object-set", "packed",
+                "--scene", "packed",
+                "--num-rounds", "100",
                 "--sideview",
-                "--add-noise",
-                "dex",
+                "--add-noise", "dex",
                 "--force",
                 "--best",
-                "--model",
-                "./data/models/giga_pile.pt",
-                "--type",
-                "giga",
-                "--result-path",
-                "./result",
-                "--sim-gui"
+                "--model", "data/models/giga_packed.pt",
+                "--type", "giga",
+                "--result-path", "."
             ],
-            "console": "integratedTerminal",
-            "justMyCode": true
+            "console": "integratedTerminal"
         },
     ]
 }

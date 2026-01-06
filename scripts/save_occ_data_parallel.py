@@ -14,14 +14,20 @@ def sample_occ(mesh_pose_list_path, num_point, uniform):
     return points, occ
 
 def save_occ(mesh_pose_list_path, args):
+    name = os.path.basename(mesh_pose_list_path)[:-4]
+    save_root = os.path.join(args.raw, 'occ', name)
+    
+    # Skip if already generated
+    if os.path.exists(save_root) and len(os.listdir(save_root)) == args.num_file:
+        return name + " (skipped)"
+    
     points, occ = sample_occ(mesh_pose_list_path, args.num_point_per_file * args.num_file, args.uniform)
     points = points.astype(np.float16).reshape(args.num_file, args.num_point_per_file, 3)
     occ = occ.reshape(args.num_file, args.num_point_per_file)
-    name = os.path.basename(mesh_pose_list_path)[:-4]
-    save_root = os.path.join(args.raw, 'occ', name)
-    os.makedirs(save_root)
+    os.makedirs(save_root, exist_ok=True)
     for i in range(args.num_file):
         np.savez(os.path.join(save_root, '%04d.npz' % i), points=points[i], occ=occ[i])
+    return name
 
 def log_result(result):
     g_completed_jobs.append(result)

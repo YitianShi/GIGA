@@ -43,7 +43,7 @@ class ClutterRemovalSim(object):
         return max(0, self.world.p.getNumBodies() - 1)  # remove table from body count
 
     def discover_objects(self):
-        root = self.urdf_root / self.object_set
+        root = self.urdf_root / self.object_set / "train"
         self.object_urdfs = [f for f in root.iterdir() if f.suffix == ".urdf"]
 
     def save_state(self):
