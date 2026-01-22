@@ -10,8 +10,61 @@ from vgn.io import *
 from vgn.perception import *
 from vgn.utils.misc import apply_noise
 
+import time
+from matplotlib import pyplot as plt
+from matplotlib.widgets import Slider
 
 RESOLUTION = 40
+
+
+def visualize_tsdf_heatmaps(tsdf_vol):
+    """
+    Interactive heatmap viewer for TSDF volumes.
+    The colormap is centered so that 0 (the surface) is white.
+    """
+    # Create the figure and a main axis for the heatmap
+    fig, ax = plt.subplots(figsize=(9, 8))
+    plt.subplots_adjust(left=0.1, bottom=0.2) # Space for the slider
+
+    # Initial slice index
+    z_idx = tsdf_vol.shape[2] // 2
+    
+    # Plotting the raw heatmap
+    # Using 'RdBu' colormap: Red = Inside, Blue = Outside, White = Surface
+    im = ax.imshow(tsdf_vol[:, :, z_idx], 
+                   cmap='RdBu', 
+                   vmin=-1.0, 
+                   vmax=1.0, 
+                   origin='lower',
+                   interpolation='nearest') # 'nearest' keeps voxel boundaries sharp
+
+    # Add colorbar
+    cbar = fig.colorbar(im, ax=ax)
+    cbar.set_label('Signed Distance (Normalized/Truncated)')
+    
+    ax.set_title(f"TSDF Z-Slice: {z_idx}")
+    ax.set_xlabel("X-Voxel Index")
+    ax.set_ylabel("Y-Voxel Index")
+
+    # Add the Slider (Tool Bar)
+    ax_slider = plt.axes([0.2, 0.08, 0.6, 0.04]) # [left, bottom, width, height]
+    slider = Slider(
+        ax=ax_slider,
+        label='Z Index ',
+        valmin=0,
+        valmax=tsdf_vol.shape[2] - 1,
+        valinit=z_idx,
+        valfmt='%d'
+    )
+
+    def update(val):
+        idx = int(slider.val)
+        im.set_data(tsdf_vol[:, :, idx])
+        ax.set_title(f"TSDF Z-Slice: {idx}")
+        fig.canvas.draw_idle()
+
+    slider.on_changed(update)
+    plt.show()
 
 def process_one_scene(args, f):
     if f.suffix != ".npz":
@@ -20,8 +73,8 @@ def process_one_scene(args, f):
     # Skip if already generated
     voxel_path = args.dataset / "scenes" / (f.stem + ".npz")
     pc_path = args.dataset / "point_clouds" / (f.stem + ".npz")
-    if voxel_path.exists() and pc_path.exists():
-        return f.stem + " (skipped)"
+    # if voxel_path.exists() and pc_path.exists():
+    #     return f.stem + " (skipped)"
     
     depth_imgs, extrinsics = read_sensor_data(args.raw, f.stem)
     # add noise
@@ -31,6 +84,9 @@ def process_one_scene(args, f):
     else:
         tsdf = create_tsdf(size, RESOLUTION, depth_imgs, intrinsic, extrinsics)
     grid = tsdf.get_grid()
+    visualize_tsdf_heatmaps(tsdf.get_grid()[0])
+    o3d.visualization.draw_geometries([tsdf.get_cloud()])
+
     write_voxel_grid(args.dataset, f.stem, grid)
 
     pc = tsdf.get_cloud()

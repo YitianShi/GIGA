@@ -21,7 +21,7 @@ If you find our work useful in your research, please consider [citing](#citing).
 3. Go to the root directory and install the project locally using `pip`
 
 ```
-pip install -e .
+pip install -e . --no-build-isolation
 ```
 
 4. Build ConvONets dependents by running `python scripts/convonet_setup.py build_ext --inplace`.

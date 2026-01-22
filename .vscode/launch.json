@@ -43,7 +43,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/scripts/construct_dataset_parallel.py",
             "args": [
-                "--num-proc", "80",
+                "--num-proc", "1",
                 "--single-view",
                 "--add-noise", "dex",
                 "./data/packed/data_packed_train_raw",
@@ -61,7 +61,7 @@
                 "100000",
                 "2",
                 "--num-proc",
-                "80"
+                "1"
             ],
             "console": "integratedTerminal"
         },
@@ -74,7 +74,7 @@
             "args": [
                 "--dataset_raw", "data/packed/data_packed_train_raw",
                 "--dataset", "data/packed/data_packed_train_processed_dex_noise",
-                "--batch-size", "256",
+                "--batch-size", "5",
             ],
             "console": "integratedTerminal"
         },

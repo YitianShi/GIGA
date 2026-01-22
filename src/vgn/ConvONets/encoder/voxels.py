@@ -65,6 +65,19 @@ class LocalVoxelEncoder(nn.Module):
         fea_plane = scatter_mean(c, index, out=fea_plane)
         fea_plane = fea_plane.reshape(p.size(0), self.c_dim, self.reso_plane, self.reso_plane)
 
+        # visualize feature plane
+        fea_plane_vis = fea_plane[0].detach().cpu().numpy()
+        # do pca on feature plane
+        fea_plane_vis = fea_plane_vis.reshape(self.c_dim, -1)
+        from sklearn.decomposition import PCA
+        pca = PCA(n_components=3)
+        fea_plane_vis = pca.fit_transform(fea_plane_vis.T).T
+        fea_plane_vis = (fea_plane_vis - fea_plane_vis.min()) / (fea_plane_vis.max() - fea_plane_vis.min() + 1e-5)
+        fea_plane_vis = fea_plane_vis.reshape(3, fea_plane.size(2), fea_plane.size(3))
+        import matplotlib.pyplot as plt
+        plt.imshow(fea_plane_vis.transpose(1, 2, 0))
+        plt.show()
+
         # process the plane features with UNet
         if self.unet is not None:
             fea_plane = self.unet(fea_plane)
